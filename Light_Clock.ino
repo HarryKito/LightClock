@@ -74,6 +74,7 @@ void setup()
     delay(500);
     Serial.print(".");
   }
+  // Local IP Check
   Serial.print("\nIP address: ");
   Serial.println(WiFi.localIP());
 
@@ -86,14 +87,15 @@ void setup()
     delay(10);
   }
 
-  // Route for root / web page
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest * request)
-  {
-    request->send_P(200, "text/html", index_html, Processor);
-  }
-           );
+  // root web page
+  server.on(
+    "/", HTTP_GET, [](AsyncWebServerRequest * request)
+  { request->send_P(200, "text/html", index_html, Processor); }
+  );
+  
   // Send a GET request to <ESP_IP>/update?state=<inputMessage>
-  server.on("/update", HTTP_GET, [] (AsyncWebServerRequest * request)
+  server.on(
+    "/update", HTTP_GET, [] (AsyncWebServerRequest * request)
   {
     String inputMessage;
     String inputParam;
@@ -115,37 +117,40 @@ void setup()
   });
 
   // Send a GET request to <ESP_IP>/state
-  server.on("/state", HTTP_GET, [] (AsyncWebServerRequest * request)
-  {
-    request->send(200, "text/plain", String(rvt).c_str());
-  });
+  server.on(
+    "/state", HTTP_GET, [] (AsyncWebServerRequest * request)
+  { request->send(200, "text/plain", String(rvt).c_str()); }
+  );
 
   // Start server
   server.begin();
-
-  for (int i = 0; i < NUMPIXELS; i++)
-      strip.setPixelColor(i, 255, 255, 255);
 }
 
+// Blink LED <<TEST>>
 bool blink_ = true;
 
 void loop()
 {
+  // update NTP time 
   timeClient.update();
-
   currentHour = timeClient.getHours();
   currentMinute = timeClient.getMinutes();
 
   Serial.print("time : "); Serial.print(currentHour); Serial.print(":"); Serial.print(currentMinute); Serial.println(rvt ? " true" : " false");
   digitalWrite(LED_BUILTIN, rvt);
 
+  // TEST CASE 1 알리 접속 시간대에 깜빡이게 ㅋㅋㅋ <<TEST>>
   if(currentHour < 23 && currentMinute <= 40)
   {
     blink_ = !blink_;
-    strip.setBrightness(blink_ ? 0 : 255);
-    Serial.print(blink_);
+
+    if(blink_)
+      for (int i = 0; i < NUMPIXELS; i++)
+        strip.setPixelColor(i, 255, 255, 255);
+
+    Serial.print(blink_ ? "Blink is TRUE" : "Blink is False");
   }
   strip.show();
   
-  delay(3000);
+  delay(1000);
 }
