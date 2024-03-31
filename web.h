@@ -20,12 +20,15 @@ const char index_html[] PROGMEM = R"rawliteral(
   </style>
 </head>
 <body>
-  <h2>ESP Web Server</h2>
+  <h2>Home Light Clock System</h2>
   %BUTTONPLACEHOLDER%
-<script>function toggleCheckbox(element) {
+<script>function toggleCheckbox(element)
+{
   var xhr = new XMLHttpRequest();
-  if(element.checked){ xhr.open("GET", "/update?state=1", true); }
-  else { xhr.open("GET", "/update?state=0", true); }
+  if(element.checked)
+  { xhr.open("GET", "/update?state=1", true); }
+  else
+  { xhr.open("GET", "/update?state=0", true); }
   xhr.send();
 }
 
