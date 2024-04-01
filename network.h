@@ -1,4 +1,12 @@
+#ifndef __HAIIRON__NETWORK__
+#define __HAIIRON__NETWORK__
+
 #include <avr/pgmspace.h>
+#include "include.h"
+
+// Setup the local wifi
+const char* ssid     = "iptime";
+const char* password = "appdevelopment";
 
 /*-- basic 페이지 내용 --*/
 const char index_html[] PROGMEM = R"rawliteral(
@@ -62,3 +70,29 @@ setInterval(function(){
 </html>
 )rawliteral";
 /*-- --------------------- --*/
+
+String outputState()
+{
+  if (rvt)
+  {
+    return "checked";
+  }
+  else
+    return "";
+}
+
+//Web
+String Processor(const String& var)
+{
+  if (var == "BUTTONPLACEHOLDER")
+  {
+    String buttons = "";
+    String outputStateValue = outputState();
+    String Clock = String(currentHour) + ":" + String(currentMinute);
+    buttons += "<h4>Power - LED - State <span id=\"outputState\"></span></h4><label class=\"switch\"><input type=\"checkbox\" onchange=\"toggleCheckbox(this)\" id=\"output\" " + outputStateValue + "><span class=\"slider\"></span></label><h3> Time " + Clock + "</h3>";
+    return buttons;
+  }
+  return String();
+}
+
+#endif

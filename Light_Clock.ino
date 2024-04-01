@@ -6,57 +6,23 @@
 
 // ESP wifi ctr library
 #include <ESPAsyncWebServer.h>
+#include <ESP8266mDNS.h>
 #include <ESP8266WiFi.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 
-#include"web.h"
-
-// Setup the ESP wifi
-const char* ssid     = "iptime";
-const char* password = "appdevelopment";
+#include"network.h"
 
 AsyncWebServer server(80);
-
-// LED ON/OFF
-bool rvt = false;
 
 // NTP data collector
 WiFiUDP ntpUDP;
 const char* NTP      = "pool.ntp.org";
 NTPClient timeClient(ntpUDP, NTP, 32400, 3600000);
 
-// Time data
-int currentHour = 0;
-int currentMinute = 0;
-
 // NEO PIXEL STRIP LED
 #define NUMPIXELS 3
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUMPIXELS, 0, NEO_GRB + NEO_KHZ800);
-
-//Web
-String Processor(const String& var)
-{
-  if (var == "BUTTONPLACEHOLDER")
-  {
-    String buttons = "";
-    String outputStateValue = outputState();
-    String Clock = String(currentHour) + ":" + String(currentMinute);
-    buttons += "<h4>Power - LED - State <span id=\"outputState\"></span></h4><label class=\"switch\"><input type=\"checkbox\" onchange=\"toggleCheckbox(this)\" id=\"output\" " + outputStateValue + "><span class=\"slider\"></span></label><h3> Time " + Clock + "</h3>";
-    return buttons;
-  }
-  return String();
-}
-
-String outputState()
-{
-  if (rvt)
-  {
-    return "checked";
-  }
-  else
-    return "";
-}
 
 void setup()
 {
@@ -74,9 +40,13 @@ void setup()
     delay(500);
     Serial.print(".");
   }
+  
   // Local IP Check
   Serial.print("\nIP address: ");
   Serial.println(WiFi.localIP());
+  // mDNS Service
+  if (!MDNS.begin("homelight"))
+    Serial.println("Error setting up MDNS responder!");
 
   timeClient.begin();
 
@@ -140,14 +110,15 @@ void loop()
   digitalWrite(LED_BUILTIN, rvt);
 
   // TEST CASE 1 알리 접속 시간대에 깜빡이게 ㅋㅋㅋ <<TEST>>
-  if(currentHour < 23 && currentMinute <= 40)
+  if(currentHour >= 12 && currentMinute >= 10)
   {
+    strip.setBrightness(100);
     blink_ = !blink_;
 
-    if(blink_)
       for (int i = 0; i < NUMPIXELS; i++)
         strip.setPixelColor(i, 255, 255, 255);
-
+    if(!blink_)
+      strip.setBrightness(0);
     Serial.print(blink_ ? "Blink is TRUE" : "Blink is False");
   }
   strip.show();
