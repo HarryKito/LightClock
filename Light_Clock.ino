@@ -29,7 +29,7 @@ void setup()
   Serial.begin(9600);
   strip.begin();
 
-  //  첫 부팅 LED check
+  // LED check
   for (int i = 0; i < NUMPIXELS; i++)
     strip.setPixelColor(i, 255, 255, 255);
   strip.show();
@@ -63,9 +63,7 @@ void setup()
   { request->send_P(200, "text/html", index_html, Processor); }
   );
   
-  // Send a GET request to <ESP_IP>/update?state=<inputMessage>
-  server.on(
-    "/update", HTTP_GET, [] (AsyncWebServerRequest * request)
+  server.on("/update", HTTP_GET, [] (AsyncWebServerRequest * request)
   {
     String inputMessage;
     String inputParam;
@@ -87,8 +85,7 @@ void setup()
   });
 
   // Send a GET request to <ESP_IP>/state
-  server.on(
-    "/state", HTTP_GET, [] (AsyncWebServerRequest * request)
+  server.on("/state", HTTP_GET, [] (AsyncWebServerRequest * request)
   { request->send(200, "text/plain", String(rvt).c_str()); }
   );
 
@@ -108,9 +105,31 @@ void loop()
 
   Serial.print("time : "); Serial.print(currentHour); Serial.print(":"); Serial.print(currentMinute); Serial.println(rvt ? " true" : " false");
   digitalWrite(LED_BUILTIN, rvt);
-
-  // TEST CASE 1 알리 접속 시간대에 깜빡이게 ㅋㅋㅋ <<TEST>>
-  if(currentHour >= 12 && currentMinute >= 10)
+  
+// main clock Light System
+  if(currentHour < 6)
+  {
+    for (int i = 0; i < NUMPIXELS; i++)
+        strip.setPixelColor(i, 0, 0, 0); // a darkness!
+  }
+  else if(currentHour >= 6)
+  {
+    for (int i = 0; i < NUMPIXELS; i++)
+        strip.setPixelColor(i, 255, 80, 25); // bright red colour (similar sunrise near the horizon !)
+  }
+  else if(currentHour >= 7)
+  {
+    for (int i = 0; i < NUMPIXELS; i++)
+        strip.setPixelColor(i, 255, 200, 65); // bright yellow colour (similar sunrise I liked color !)
+  }
+  else if(currentHour >= 8)
+  {
+    for (int i = 0; i < NUMPIXELS; i++)
+        strip.setPixelColor(i, 255, 255, 255); // GOOD MORNING
+  }
+  
+  // TEST CASE 1 알리 접속 시간대에 blinking! ㅋㅋㅋ <<TEST>>
+  if(currentHour >= 21 && currentMinute >= 50)
   {
     strip.setBrightness(100);
     blink_ = !blink_;
@@ -122,6 +141,6 @@ void loop()
     Serial.print(blink_ ? "Blink is TRUE" : "Blink is False");
   }
   strip.show();
-  
+
   delay(1000);
 }
