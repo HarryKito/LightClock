@@ -27,6 +27,8 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUMPIXELS, 0, NEO_GRB + NEO_KHZ800);
 void setup()
 {
   Serial.begin(9600);
+  
+  pinMode(LED_BUILTIN, OUTPUT);
   strip.begin();
 
   // LED check
@@ -98,15 +100,17 @@ bool blink_ = true;
 
 void loop()
 {
+  rvt = !rvt;
   // update NTP time 
   timeClient.update();
   currentHour = timeClient.getHours();
   currentMinute = timeClient.getMinutes();
 
-  Serial.print("time : "); Serial.print(currentHour); Serial.print(":"); Serial.print(currentMinute); Serial.println(rvt ? " true" : " false");
+  Serial.print("time : "); Serial.print(currentHour); Serial.print(":"); Serial.print(currentMinute); Serial.println( rvt ? " true" : " false");
   digitalWrite(LED_BUILTIN, rvt);
   
 // main clock Light System
+  strip.setBrightness(255);
   if(currentHour < 6)
   {
     for (int i = 0; i < NUMPIXELS; i++)
@@ -127,20 +131,18 @@ void loop()
     for (int i = 0; i < NUMPIXELS; i++)
         strip.setPixelColor(i, 255, 255, 255); // GOOD MORNING
   }
-  
-  // TEST CASE 1 알리 접속 시간대에 blinking! ㅋㅋㅋ <<TEST>>
-  if(currentHour >= 21 && currentMinute >= 50)
-  {
-    strip.setBrightness(100);
-    blink_ = !blink_;
 
-      for (int i = 0; i < NUMPIXELS; i++)
-        strip.setPixelColor(i, 255, 255, 255);
-    if(!blink_)
-      strip.setBrightness(0);
-    Serial.print(blink_ ? "Blink is TRUE" : "Blink is False");
-  }
+  // // TEST CASE 1 알리 접속 시간대에 blinking! ㅋㅋㅋ <<TEST>>
+  // if(currentHour >= 21 && currentMinute >= 50)
+  // {
+  //   blink_ = !blink_;
+
+  //     for (int i = 0; i < NUMPIXELS; i++)
+  //       strip.setPixelColor(i, 255, 255, 255);
+  //   if(!blink_)
+  //     strip.setBrightness(0);
+  //   Serial.print(blink_ ? "Blink is TRUE" : "Blink is False");
+  // }
   strip.show();
-
   delay(1000);
 }
